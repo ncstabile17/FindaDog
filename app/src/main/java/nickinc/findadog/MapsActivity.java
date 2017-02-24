@@ -3,6 +3,7 @@ package nickinc.findadog;
 import android.*;
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -27,14 +28,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
+    protected static ArrayList<LatLng> locations = new ArrayList<>();
+    protected static ArrayList<String> breeds = new ArrayList<>();
+    static GoogleMap mMap;
     LocationManager locationManager;
     LocationListener locationListener;
+    String s;
+   // LatLng newLoc;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -74,6 +80,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Intent intent = getIntent();
+        s = intent.getStringExtra("Dog breed");
+
     }
 
 
@@ -88,25 +98,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
         mMap = googleMap;
+
+        if (locations.size() > 0) {
+            for (int i = 0; i<locations.size(); i++) {
+                mMap.addMarker(new MarkerOptions().position(locations.get(i)).title(breeds.get(i)));
+            }
+        }
+
+        if(s != null) {
+            System.out.println("In if....");
+            makeNewMarker(s);
+        }
+
+
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
-                Geocoder geocoder =  new Geocoder(getApplicationContext(), Locale.getDefault());
-                double lat = latLng.latitude;
-                double lng = latLng.longitude;
-
-
+                ListActivity.newLoc = new LatLng(latLng.latitude, latLng.longitude);
+                Intent intent = new Intent(getApplicationContext(), InfoActivity.class);
+                startActivity(intent);
             }
         });
 
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                mMap.clear();
+               // mMap.clear();
                 LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.addMarker(new MarkerOptions().position(myLocation).title("You are here"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,15));
@@ -162,10 +184,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
                 Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 LatLng myLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                mMap.clear();
+               // mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(myLocation).title("You are here"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,15));
             }
         }
+    }//onMapReady
+
+    public void makeNewMarker(String dogName) {
+        System.out.println("In makeNewMarker...");
+        System.out.println(ListActivity.newLoc.toString());
+        LatLng loc = ListActivity.newLoc;
+        System.out.println(dogName);
+        mMap.addMarker(new MarkerOptions().position(loc).title(dogName));
+        locations.add(loc);
+        breeds.add(dogName);
     }
 }
