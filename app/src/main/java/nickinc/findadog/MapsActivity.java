@@ -3,6 +3,7 @@ package nickinc.findadog;
 import android.*;
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -16,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,6 +27,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -35,12 +38,12 @@ import java.util.Locale;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     protected static ArrayList<LatLng> locations = new ArrayList<>();
-    protected static ArrayList<String> breeds = new ArrayList<>();
+    protected static ArrayList<Dog> dogs = new ArrayList<>();
     static GoogleMap mMap;
     LocationManager locationManager;
     LocationListener locationListener;
-    String s;
-   // LatLng newLoc;
+    Dog newDog;
+    AlertDialog alertDialog;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -53,7 +56,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        //Go to other screen with My Dogs listed
+        Intent intent = new Intent(getApplicationContext(), ListActivity.class);
+        startActivity(intent);
 
         return true;
     }//end onOptionsItemSelected
@@ -82,7 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();
-        s = intent.getStringExtra("Dog breed");
+        newDog = (Dog)intent.getSerializableExtra("Dog");
 
     }
 
@@ -103,16 +107,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (locations.size() > 0) {
             for (int i = 0; i<locations.size(); i++) {
-                mMap.addMarker(new MarkerOptions().position(locations.get(i)).title(breeds.get(i)));
+                Dog currDog = dogs.get(i);
+                if (!(newDog.name.equals(""))) {
+                    mMap.addMarker(new MarkerOptions().position(locations.get(i)).title(currDog.dogBreed).snippet(currDog.name + " was seen at " + currDog.time).icon(BitmapDescriptorFactory.fromResource(R.drawable.sadpup)));
+                }
+                else {
+                    mMap.addMarker(new MarkerOptions().position(locations.get(i)).title(currDog.dogBreed).snippet("This pup was seen at " + currDog.time).icon(BitmapDescriptorFactory.fromResource(R.drawable.sadpup)));
+
+                }
             }
         }
 
-        if(s != null) {
+        if(!(null == newDog)) {
             System.out.println("In if....");
-            makeNewMarker(s);
+            makeNewMarker(newDog);
         }
 
-
+        else {
+            dialog();
+        }
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -191,13 +204,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }//onMapReady
 
-    public void makeNewMarker(String dogName) {
+    public void makeNewMarker(Dog newDog) {
         System.out.println("In makeNewMarker...");
         System.out.println(ListActivity.newLoc.toString());
         LatLng loc = ListActivity.newLoc;
-        System.out.println(dogName);
-        mMap.addMarker(new MarkerOptions().position(loc).title(dogName));
+        System.out.println(newDog.dogBreed);
+        if (!(newDog.name.equals(""))) {
+            mMap.addMarker(new MarkerOptions().position(loc).title(newDog.dogBreed).snippet(newDog.name + " was seen at " + newDog.time).icon(BitmapDescriptorFactory.fromResource(R.drawable.sadpup)));
+        }
+        else {
+            mMap.addMarker(new MarkerOptions().position(loc).title(newDog.dogBreed).snippet("This pup was seen at " + newDog.time).icon(BitmapDescriptorFactory.fromResource(R.drawable.sadpup)));
+        }
         locations.add(loc);
-        breeds.add(dogName);
+        dogs.add(newDog);
+    }//makeNewMarker
+
+    public void dialog() {
+        //public void open(View view){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("Long click on recent locations that you've spotted a dog!");
+        alertDialogBuilder.setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        //
+                    }
+                });
+
+
+        alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 }

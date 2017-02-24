@@ -20,15 +20,39 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="15dp"
         android:id="@+id/dogBreed"
-        android:hint="Enter the dog breed" />
+        android:hint="Enter the dog breed"
+        android:textSize="18sp" />
 
     <Button
         android:text="Enter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:id="@+id/enterButton"
+        android:onClick="backToMap"
         android:layout_below="@+id/dogBreed"
         android:layout_alignEnd="@+id/dogBreed"
-        android:layout_marginEnd="21dp"
-        android:id="@+id/enterButton"
-        android:onClick="backToMap" />
+        android:layout_marginTop="102dp" />
+
+    <EditText
+        android:layout_height="wrap_content"
+        android:inputType="time"
+        android:ems="10"
+        android:id="@+id/timeText"
+        android:hint="Enter the time you saw the dog"
+        android:layout_width="300dp"
+        android:layout_below="@+id/dogBreed"
+        android:layout_alignStart="@+id/dogBreed"
+        android:textSize="18sp" />
+
+    <EditText
+        android:layout_width="275dp"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:layout_below="@+id/timeText"
+        android:layout_alignStart="@+id/timeText"
+        android:id="@+id/nameText"
+        android:hint="Enter dog name (if known)" />
+
 </RelativeLayout>

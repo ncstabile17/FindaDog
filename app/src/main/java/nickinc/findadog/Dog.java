@@ -1,7 +1,9 @@
 package nickinc.findadog;
 
 
-public class Dog {
+import java.io.Serializable;
+
+public class Dog implements Serializable {
 
     String dogBreed;
     String time;
@@ -16,6 +18,13 @@ public class Dog {
     Dog(String db, String t) {
         dogBreed = db;
         time = t;
+        name = "";
+    }
+
+    Dog() {
+        dogBreed = "";
+        time = "";
+        name = "";
     }
 
 }
